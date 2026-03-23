@@ -563,9 +563,8 @@ const RegistrationFee = () => {
                         </label>
                       </td>
                       <td className="p-4 border-r border-gray-200">
-                        <label className={!isFinal ? "line-through text-gray-400" : ""}>
+                        <label >
                           <input
-                            disabled={!isFinal}
                             type="radio"
                             name="price"
                             onChange={() => handleBaseSelect(item.final, fee.title, item.category)}
@@ -576,9 +575,8 @@ const RegistrationFee = () => {
                         </label>
                       </td>
                       <td className="p-4">
-                        <label className={!isFinal ? "line-through text-gray-400" : ""}>
+                        <label >
                           <input
-                            disabled={!isFinal}
                             type="radio"
                             name="price"
                             onChange={() => handleBaseSelect(item.onspot, fee.title, item.category)}
@@ -635,9 +633,8 @@ const RegistrationFee = () => {
                         </label>
                       </td>
                       <td className="p-4">
-                        <label className={!isFinal ? "line-through text-gray-400" : ""}>
+                        <label >
                           <input
-                            disabled={!isFinal}
                             type="radio"
                             name="price"
                             onChange={() => handleBaseSelect(item.final, fee.title, item.category)}
@@ -673,9 +670,8 @@ const RegistrationFee = () => {
                         {item.category}
                       </td>
                       <td className="w-[25%] p-4">
-                        <label className={!isFinal ? "line-through text-gray-400" : ""}>
+                        <label >
                           <input
-                            disabled={!isFinal}
                             type="radio"
                             name="price"
                             onChange={() => handleBaseSelect(item.final, fee.title, item.category)}
