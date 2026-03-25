@@ -6,30 +6,30 @@ export default function SubmissionDeadlines() {
   const deadlines = [
     {
       title: "Early Bird Registration",
-      day: "31",
-      suffix: "st",
-      month: "Mar",
+      day: "30",
+      suffix: "th",
+      month: "Jun",
       year: "2026",
     },
     {
       title: "Abstract Submission",
-      day: "1",
+      day: "31",
       suffix: "st",
-      month: "Apr",
+      month: "Oct",
       year: "2026",
     },
     {
       title: "Full Paper Submission",
-      day: "30",
+      day: "7",
       suffix: "th",
-      month: "Apr",
+      month: "Nov",
       year: "2026",
     },
     {
       title: "Final Registration",
-      day: "31",
+      day: "1",
       suffix: "st",
-      month: "May",
+      month: "Nov",
       year: "2026",
     }
   ];

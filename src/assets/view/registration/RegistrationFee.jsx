@@ -9,12 +9,16 @@ import Hero from "../../components/common/common-hero/common-hero.jsx";
 import RegistrationSteps from "../../components/RegistrationSteps.jsx";
 import DiscountConfetti from "./discount-confetti.jsx";
 import ConferenceCards from "./ConferenceCards.jsx";
-import { Helmet } from "react-helmet";
+
+// ── Journal & Addons ──────────────────────────────────────────────────────────
+import JournalSupport from "./JournalSupport.jsx";
+import Addons from "./Addons.jsx";
 
 // ─── Pricing Calculator ───────────────────────────────────────────────────────
+// combinedBase = fee table value + journal amount + addons amount
+// Discounts are applied to the combinedBase so journal/addon costs also get reduced.
 const calculatePricing = ({ baseAmount, participantCategory, hasMembership, hasCoupon }) => {
   const base = parseFloat(baseAmount);
-  // Students pay $15 membership fee, others pay $20
   const membershipFeeAmount = participantCategory?.toLowerCase().includes("student") ? 15 : 20;
 
   let calc = {
@@ -29,20 +33,17 @@ const calculatePricing = ({ baseAmount, participantCategory, hasMembership, hasC
   };
 
   if (hasMembership && hasCoupon) {
-    // Both active: 10% off registration + membership fee
     calc.totalDiscount = base * 0.10;
     calc.membershipFee = membershipFeeAmount;
     calc.membershipDiscount = base * 0.05;
     calc.couponDiscount = base * 0.05;
     calc.finalAmount = base - calc.totalDiscount + calc.membershipFee;
   } else if (hasMembership && !hasCoupon) {
-    // Membership only: 5% off + membership fee
     calc.membershipDiscount = base * 0.05;
     calc.totalDiscount = calc.membershipDiscount;
     calc.membershipFee = membershipFeeAmount;
     calc.finalAmount = base - calc.membershipDiscount + calc.membershipFee;
   } else if (!hasMembership && hasCoupon) {
-    // Coupon only: 5% off
     calc.couponDiscount = base * 0.05;
     calc.totalDiscount = calc.couponDiscount;
     calc.finalAmount = base - calc.couponDiscount;
@@ -54,7 +55,6 @@ const calculatePricing = ({ baseAmount, participantCategory, hasMembership, hasC
   calc.bankTax = parseFloat(bankTax.toFixed(2));
   calc.total = parseFloat((calc.finalAmount + bankTax).toFixed(2));
 
-  // Round all fields to 2 decimal places
   Object.keys(calc).forEach((key) => {
     calc[key] = parseFloat(calc[key].toFixed(2));
   });
@@ -62,7 +62,7 @@ const calculatePricing = ({ baseAmount, participantCategory, hasMembership, hasC
   return calc;
 };
 
-// ─── Checkout Panel Component ─────────────────────────────────────────────────
+// ─── Checkout Panel ───────────────────────────────────────────────────────────
 const CheckoutPanel = ({
   pricing,
   baseSelected,
@@ -74,8 +74,14 @@ const CheckoutPanel = ({
   onCouponChange,
   onCouponApply,
   onCouponRemove,
+  // Journal & Addon breakdown props
+  selectedJournal,
+  selectedAddons,
+  registrationBase,
 }) => {
   const membershipFee = participantCategory?.toLowerCase().includes("student") ? 15 : 20;
+  const journalAmount = selectedJournal?.specialPrice || 0;
+  const addonsAmount = selectedAddons.reduce((sum, a) => sum + a.price, 0);
 
   return (
     <div className="md:w-[420px] shrink-0 space-y-4">
@@ -89,11 +95,8 @@ const CheckoutPanel = ({
             <p className="text-sm text-indigo-600 mt-0.5">
               Get 5% discount on registration fee
             </p>
-            <p className="text-sm font-bold text-indigo-700 mt-2">
-              Fee: ${membershipFee}
-            </p>
+            <p className="text-sm font-bold text-indigo-700 mt-2">Fee: ${membershipFee}</p>
           </div>
-          {/* Toggle Switch */}
           <button
             type="button"
             onClick={() => onMembershipToggle(!membership)}
@@ -153,30 +156,64 @@ const CheckoutPanel = ({
         )}
       </div>
 
-      {/* Price Breakdown Card */}
+      {/* Price Breakdown */}
       {baseSelected && (
         <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm">
           <h3 className="text-[15px] font-bold text-indigo-700 mb-4">Price Breakdown</h3>
           <div className="space-y-2 text-sm">
+
+            {/* Base registration fee */}
             <div className="flex justify-between text-gray-700">
               <span>Base Registration Fee:</span>
-              <span className="font-medium">${pricing.baseAmount.toFixed(2)}</span>
+              <span className="font-medium">
+                ${(registrationBase ?? pricing.baseAmount).toFixed(2)}
+              </span>
             </div>
 
+            {/* Journal support row */}
+            {journalAmount > 0 && (
+              <div className="flex justify-between text-gray-700">
+                <span>Journal Support ({selectedJournal?.tier}):</span>
+                <span className="font-medium">+ ${journalAmount.toLocaleString()}</span>
+              </div>
+            )}
+
+            {/* Add-ons row */}
+            {addonsAmount > 0 && (
+              <div className="flex justify-between text-gray-700">
+                <span>Add-ons ({selectedAddons.length} selected):</span>
+                <span className="font-medium">+ ${addonsAmount}</span>
+              </div>
+            )}
+
+            {/* Combined subtotal (only shown when extras exist) */}
+            {(journalAmount > 0 || addonsAmount > 0) && (
+              <div className="flex justify-between text-gray-800 font-semibold border-t border-dashed border-indigo-200 pt-2 mt-1">
+                <span>Combined Subtotal:</span>
+                <span>
+                  $
+                  {(
+                    (registrationBase ?? pricing.baseAmount) +
+                    journalAmount +
+                    addonsAmount
+                  ).toLocaleString()}
+                </span>
+              </div>
+            )}
+
+            {/* Discounts */}
             {pricing.membershipDiscount > 0 && (
               <div className="flex justify-between text-indigo-700">
                 <span>Membership Discount (5%):</span>
                 <span className="font-semibold">- ${pricing.membershipDiscount.toFixed(2)}</span>
               </div>
             )}
-
             {pricing.couponDiscount > 0 && (
               <div className="flex justify-between text-indigo-700">
                 <span>Coupon Discount (5%):</span>
                 <span className="font-semibold">- ${pricing.couponDiscount.toFixed(2)}</span>
               </div>
             )}
-
             {pricing.membershipFee > 0 && (
               <div className="flex justify-between text-gray-700">
                 <span>Membership Fee:</span>
@@ -190,7 +227,6 @@ const CheckoutPanel = ({
               <span>Subtotal:</span>
               <span>${pricing.finalAmount.toFixed(2)}</span>
             </div>
-
             <div className="flex justify-between text-gray-600">
               <span>Bank Convenience Charge (6%):</span>
               <span>${pricing.bankTax.toFixed(2)}</span>
@@ -226,11 +262,8 @@ const CheckoutPanel = ({
 // ─── Main Component ───────────────────────────────────────────────────────────
 const RegistrationFee = () => {
   useEffect(() => {
-    // Hide wordmark to prevent 404 error
     window.Razorpay = window.Razorpay || {};
-    window.Razorpay.config = {
-      display: { hide_wordmark: true },
-    };
+    window.Razorpay.config = { display: { hide_wordmark: true } };
 
     const loadRazorpay = () => {
       const script = document.createElement("script");
@@ -238,7 +271,6 @@ const RegistrationFee = () => {
       script.async = true;
       document.body.appendChild(script);
     };
-
     if (!document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]')) {
       loadRazorpay();
     }
@@ -255,26 +287,39 @@ const RegistrationFee = () => {
   Final_Last_Date.setHours(23, 59, 59, 999);
   const dateNow = new Date();
   const isEarlyBird = dateNow <= Early_Bird_Last_Date;
-  const isFinal = dateNow <= Final_Last_Date;
 
   const navigate = useNavigate();
   const RegistrationFeeRef = useRef();
 
-  // Form state
+  // ── Form state ──────────────────────────────────────────────────────────────
   const [participantCategory, setParticipantCategory] = useState("");
   const [selectedBase, setSelectedBase] = useState(null); // { value, title, category }
 
-  // Discount state
+  // ── Journal & Addons state ──────────────────────────────────────────────────
+  const [selectedJournal, setSelectedJournal] = useState(null);
+  const [selectedAddons, setSelectedAddons] = useState([]);
+
+  // Reset journal & addons whenever the base fee changes
+  useEffect(() => {
+    setSelectedJournal(null);
+    setSelectedAddons([]);
+  }, [selectedBase]);
+
+  // ── Discount state ──────────────────────────────────────────────────────────
   const [membership, setMembership] = useState(false);
   const [couponCode, setCouponCode] = useState("");
-  const [couponStatus, setCouponStatus] = useState(null); // null | "valid" | "invalid"
+  const [couponStatus, setCouponStatus] = useState(null);
   const [couponDiscount, setCouponDiscount] = useState(0);
   const [appliedCouponCode, setAppliedCouponCode] = useState("");
 
-  // Derived pricing
+  // ── Derived pricing ─────────────────────────────────────────────────────────
+  const journalAmount = selectedJournal?.specialPrice || 0;
+  const addonsAmount = selectedAddons.reduce((sum, a) => sum + a.price, 0);
+  const combinedBase = selectedBase ? selectedBase.value + journalAmount + addonsAmount : 0;
+
   const pricing = selectedBase
     ? calculatePricing({
-        baseAmount: selectedBase.value,
+        baseAmount: combinedBase,
         participantCategory,
         hasMembership: membership,
         hasCoupon: couponDiscount > 0,
@@ -294,17 +339,14 @@ const RegistrationFee = () => {
     setSelectedBase({ value, title, category });
   };
 
-  const handleMembershipToggle = (checked) => {
-    setMembership(checked);
-  };
+  const handleMembershipToggle = (checked) => setMembership(checked);
 
   const handleCouponApply = async () => {
     if (!couponCode.trim()) return;
     try {
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/coupon/validate`,
-        { code: couponCode }
-      );
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/coupon/validate`, {
+        code: couponCode,
+      });
       setCouponStatus("valid");
       setCouponDiscount(data.discountPercent);
       setAppliedCouponCode(couponCode);
@@ -349,48 +391,60 @@ const RegistrationFee = () => {
     }
 
     const selectedFeePayload = {
-      title: selectedBase.title,
-      category: selectedBase.category,
-      value: pricing.baseAmount,
-      convenience_price: pricing.bankTax,
-      total: pricing.finalAmount,
-      discountApplied:
-        membership && couponDiscount > 0
-          ? 10
-          : membership || couponDiscount > 0
-          ? 5
-          : 0,
-      membershipFee: pricing.membershipFee,
+      title:              selectedBase.title,
+      category:           selectedBase.category,
+      value:              pricing.baseAmount,       // combinedBase after discount calc
+      convenience_price:  pricing.bankTax,
+      total:              pricing.finalAmount,
+      discountApplied:    membership && couponDiscount > 0 ? 10 : membership || couponDiscount > 0 ? 5 : 0,
+      membershipFee:      pricing.membershipFee,
       membershipSelected: membership,
-      couponCode: couponDiscount > 0 ? appliedCouponCode : null,
-      finalTotal: pricing.total, // grand total used for Razorpay order amount
+      couponCode:         couponDiscount > 0 ? appliedCouponCode : null,
+      finalTotal:         pricing.total,
+
+      // ── Breakdown fields ────────────────────────────────────────────────────
+      registrationBase: selectedBase.value,
+      journalSupport: selectedJournal
+        ? {
+            tier:    selectedJournal.tier,
+            package: selectedJournal.package,
+            amount:  selectedJournal.specialPrice,
+          }
+        : null,
+      journalAmount,
+      addons: selectedAddons.map((a) => ({
+        label:    a.label,
+        sublabel: a.sublabel,
+        amount:   a.price,
+      })),
+      addonsAmount,
     };
 
     try {
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/registration`,
-        { ...formFields, selectedFee: selectedFeePayload }
-      );
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/registration`, {
+        ...formFields,
+        selectedFee: selectedFeePayload,
+      });
 
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY,
-        amount: data.amount,
-        currency: "USD",
-        name: "Confworld Educational Research and Development Association (CERADA)",
+        key:         import.meta.env.VITE_RAZORPAY_KEY,
+        amount:      data.amount,
+        currency:    "USD",
+        name:        "Confworld Educational Research and Development Association (CERADA)",
         description: "ICETMRS-2026 Conference Registration",
-        image: "https://i.postimg.cc/3RcrXjsP/cerada-logo.webp",
-        order_id: data.order_id,
+        image:       "https://i.postimg.cc/3RcrXjsP/cerada-logo.webp",
+        order_id:    data.order_id,
         handler: async (response) => {
           try {
             await axios.post(`${import.meta.env.VITE_API_URL}/payment/validate`, {
               razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-              Order_ID: data.order_id,
+              razorpay_order_id:   response.razorpay_order_id,
+              razorpay_signature:  response.razorpay_signature,
+              Order_ID:            data.order_id,
             });
             navigate("/success", {
               state: {
-                amount: (data.amount / 100).toFixed(2),
+                amount:    (data.amount / 100).toFixed(2),
                 paymentId: response.razorpay_payment_id,
               },
             });
@@ -400,11 +454,11 @@ const RegistrationFee = () => {
           }
         },
         prefill: {
-          name: formFields.first_name,
-          email: formFields.email,
+          name:    formFields.first_name,
+          email:   formFields.email,
           contact: formFields.number,
         },
-        theme: { color: "#4f46e5" }, // indigo-600 — matches ICETMRS brand
+        theme: { color: "#4f46e5" },
         modal: {
           ondismiss: async () => {
             try {
@@ -435,16 +489,14 @@ const RegistrationFee = () => {
     }
   };
 
-  // ── Fee Data — ICETMRS-specific amounts ────────────────────────────────────
+  // ── Fee Data ────────────────────────────────────────────────────────────────
   const participationFees1 = [
     {
       title: "Physical (Onsite) Participants",
       categories: [
-        { category: "Academicians/Delegates/Research scholars", earlyBird: 449, final: 499, onspot: 599 },
-        { category: "Academicians/Delegates/Research scholars with Scopus publication", earlyBird: 949, final: 999, onspot: 1099 },
-        { category: "Students", earlyBird: 399, final: 449, onspot: 549 },
-        { category: "Students with Scopus Publication", earlyBird: 849, final: 899, onspot: 999 },
-        { category: "In-Person Attendance / Listener (Non-Presenter)", earlyBird: 249, final: 299, onspot: 399 },
+        { category: "Academicians/Delegates/Research Scholars/PhD candidates", earlyBird: 450, final: 500, onspot: 600 },
+        { category: "UG/PG Students", earlyBird: 400, final: 450, onspot: 550 },
+        { category: "Non-Presenter/Attendee/Listener", earlyBird: 280, final: 300, onspot: 400 },
       ],
     },
   ];
@@ -453,31 +505,14 @@ const RegistrationFee = () => {
     {
       title: "Virtual (Online) Participants",
       categories: [
-        { category: "Academicians / Delegates / Research Scholars ", earlyBird: 299, final: 349 },
-        { category: "Academicians/Delegates/Research scholars with Scopus publication", earlyBird: 849, final: 899 },
-        { category: "Students", earlyBird: 269, final: 299 },
-        { category: "Students with Scopus Publication", earlyBird: 749, final: 799 },
-        { category: "In-Person Attendance / Listener (Non-Presenter)", earlyBird: 119, final: 149 },
+        { category: "Academicians/Delegates/Research Scholars/PhD candidates", earlyBird: 150, final: 200 },
+        { category: "UG/PG Students", earlyBird: 100, final: 150 },
+        { category: "Non-Presenter/Attendee/Listener", earlyBird: 90, final: 100 },
       ],
     },
   ];
 
-  const PresentationFees = [
-    {
-      title: "Physical/On-site Conference Presentation with Q1/Q2 Scopus",
-      categories: [
-        { category: "Presentation with Q1 Scopus Publication", final: 2599 },
-        { category: "Presentation with Q2 Scopus Publication", final: 1599 },
-      ],
-    },
-    {
-      title: "Online/Virtual Conference Presentation with Q1/Q2 Scopus",
-      categories: [
-        { category: "Presentation with Q1 Scopus Publication", final: 2449 },
-        { category: "Presentation with Q2 Scopus Publication", final: 1449 },
-      ],
-    },
-  ];
+ 
 
   return (
     <section>
@@ -511,7 +546,7 @@ const RegistrationFee = () => {
 
         <RegistrationSteps />
 
-        {/* ── Fee Tables ── */}
+        {/* ── STEP 1: Fee Tables ── */}
         <div className="flex flex-col justify-center items-center">
           <h1 className="text-4xl md:text-5xl font-bold text-indigo-800 leading-tight">
             Registration Fees
@@ -522,10 +557,7 @@ const RegistrationFee = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:p-5">
             {participationFees1.map((fee, index) => (
-              <table
-                key={index}
-                className="table-auto w-full border-collapse rounded-b-md shadow-xl"
-              >
+              <table key={index} className="table-auto w-full border-collapse rounded-b-md shadow-xl">
                 <caption className="bg-indigo-800 text-white p-2 rounded-t-md font-bold text-md">
                   {fee.title}
                 </caption>
@@ -550,9 +582,8 @@ const RegistrationFee = () => {
                         )}
                       </td>
                       <td className="border-r border-gray-200 p-4">
-                        <label className={!isEarlyBird ? "line-through text-gray-400" : ""}>
+                        <label >
                           <input
-                            disabled={!isEarlyBird}
                             type="radio"
                             name="price"
                             onChange={() => handleBaseSelect(item.earlyBird, fee.title, item.category)}
@@ -563,7 +594,7 @@ const RegistrationFee = () => {
                         </label>
                       </td>
                       <td className="p-4 border-r border-gray-200">
-                        <label >
+                        <label>
                           <input
                             type="radio"
                             name="price"
@@ -575,7 +606,7 @@ const RegistrationFee = () => {
                         </label>
                       </td>
                       <td className="p-4">
-                        <label >
+                        <label>
                           <input
                             type="radio"
                             name="price"
@@ -593,10 +624,7 @@ const RegistrationFee = () => {
             ))}
 
             {participationFees2.map((fee, index) => (
-              <table
-                key={index}
-                className="table-auto w-full border-collapse rounded-b-md shadow-xl"
-              >
+              <table key={index} className="table-auto w-full border-collapse rounded-b-md shadow-xl">
                 <caption className="bg-indigo-800 text-white p-2 rounded-t-md font-bold text-md">
                   {fee.title}
                 </caption>
@@ -620,9 +648,8 @@ const RegistrationFee = () => {
                         )}
                       </td>
                       <td className="border-r border-gray-200 p-4">
-                        <label className={!isEarlyBird ? "line-through text-gray-400" : ""}>
+                        <label >
                           <input
-                            disabled={!isEarlyBird}
                             type="radio"
                             name="price"
                             onChange={() => handleBaseSelect(item.earlyBird, fee.title, item.category)}
@@ -633,7 +660,7 @@ const RegistrationFee = () => {
                         </label>
                       </td>
                       <td className="p-4">
-                        <label >
+                        <label>
                           <input
                             type="radio"
                             name="price"
@@ -651,50 +678,27 @@ const RegistrationFee = () => {
             ))}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:p-5">
-            {PresentationFees.map((fee, index) => (
-              <table
-                key={index}
-                className="table-fixed min-w-full w-full border-collapse rounded-b-md shadow-xl"
-              >
-                <caption className="bg-indigo-500 text-white p-2 rounded-t-lg font-bold text-md">
-                  {fee.title}
-                </caption>
-                <tbody>
-                  {fee.categories.map((item, i) => (
-                    <tr
-                      key={i}
-                      className={`${i % 2 === 0 ? "bg-gray-100" : "bg-white"} text-sm font-[450]`}
-                    >
-                      <td className="w-[75%] border-r border-gray-200 p-4 text-wrap">
-                        {item.category}
-                      </td>
-                      <td className="w-[25%] p-4">
-                        <label >
-                          <input
-                            type="radio"
-                            name="price"
-                            onChange={() => handleBaseSelect(item.final, fee.title, item.category)}
-                            value={item.final}
-                            className="mr-2"
-                          />
-                          ${item.final}
-                        </label>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ))}
-          </div>
+          
         </div>
 
         <div className="text-red-500 md:px-12 mt-2">
-          *Indicates - UG students only (You have to submit a soft copy of your
+          *Indicates - UG/PG students only (You have to submit a soft copy of your
           university/college identity card as a proof)
         </div>
 
-        {/* ── Registration Form ── */}
+        {/* ── STEP 2: Journal Publication Support ── */}
+        <JournalSupport
+          selectedJournal={selectedJournal}
+          setSelectedJournal={setSelectedJournal}
+        />
+
+        {/* ── STEP 3: Add-ons ── */}
+        <Addons
+          selectedAddons={selectedAddons}
+          setSelectedAddons={setSelectedAddons}
+        />
+
+        {/* ── STEP 4: Registration Form ── */}
         <div className="flex flex-col justify-center items-center mt-6 p-5 md:py-6">
           <h1 className="text-4xl md:text-5xl font-bold text-indigo-800 leading-tight">
             Registration Form
@@ -710,11 +714,7 @@ const RegistrationFee = () => {
             className="text-sm p-2 md:p-6 flex flex-col md:flex-row justify-between md:gap-10 items-start shadow-md rounded-lg mt-8 md:w-11/12"
           >
             {/* ── Left: Form Fields ── */}
-            <section
-              className="w-full space-y-4 md:columns-2 gap-5"
-              data-aos="fade-up"
-              data-aos-anchor-placement="top-bottom"
-            >
+            <section className="w-full space-y-4 md:columns-2 gap-5" data-aos="fade-up">
               <div>
                 <select
                   className="w-full p-2.5 border border-gray-300 outline-none rounded-md"
@@ -731,7 +731,6 @@ const RegistrationFee = () => {
               </div>
               <div>
                 <input
-                  aria-autocomplete="both"
                   type="text"
                   name="first_name"
                   className="w-full p-2.5 border border-gray-300 outline-none rounded-md"
@@ -741,7 +740,6 @@ const RegistrationFee = () => {
               </div>
               <div>
                 <input
-                  aria-autocomplete="both"
                   type="text"
                   name="last_name"
                   className="w-full p-2.5 border border-gray-300 outline-none rounded-md"
@@ -814,8 +812,6 @@ const RegistrationFee = () => {
                   required
                 />
               </div>
-
-              {/* Participant Category — controls membership fee tier */}
               <div>
                 <select
                   className="w-full p-2.5 border border-gray-300 outline-none rounded-md"
@@ -831,7 +827,6 @@ const RegistrationFee = () => {
                   <option>Student</option>
                 </select>
               </div>
-
               <div className="space-y-2">
                 <span className="block font-medium">Presentation Category:</span>
                 <div className="flex space-x-4">
@@ -845,7 +840,6 @@ const RegistrationFee = () => {
                   </label>
                 </div>
               </div>
-
               <div className="space-y-2">
                 <span className="block font-medium">Presentation Type:</span>
                 <div className="flex space-x-4">
@@ -862,11 +856,7 @@ const RegistrationFee = () => {
             </section>
 
             {/* ── Right: Checkout Panel ── */}
-            <div
-              className="mt-6 md:mt-0 w-full md:w-auto"
-              data-aos="fade-up"
-              data-aos-anchor-placement="top-bottom"
-            >
+            <div className="mt-6 md:mt-0 w-full md:w-auto" data-aos="fade-up">
               <CheckoutPanel
                 pricing={pricing}
                 baseSelected={!!selectedBase}
@@ -878,9 +868,11 @@ const RegistrationFee = () => {
                 onCouponChange={setCouponCode}
                 onCouponApply={handleCouponApply}
                 onCouponRemove={handleCouponRemove}
+                selectedJournal={selectedJournal}
+                selectedAddons={selectedAddons}
+                registrationBase={selectedBase?.value}
               />
 
-              {/* Terms + Submit */}
               <div className="mt-4 space-y-3">
                 <div className="flex items-center space-x-2">
                   <input
@@ -902,7 +894,7 @@ const RegistrationFee = () => {
                   type="submit"
                   className="w-full p-3.5 bg-amber-400 text-indigo-700 font-bold text-lg rounded-2xl hover:opacity-90 transition-all shadow-md hover:shadow-lg cursor-pointer"
                 >
-                  Check Out
+                  Check Out (Open Payment Gateway)
                 </button>
 
                 <div className="relative w-full h-2 bg-gray-100 border border-indigo-200 rounded-full overflow-hidden">
