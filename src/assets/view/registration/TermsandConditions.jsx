@@ -233,6 +233,18 @@ const TermsandConditions = () => {
           </div>
         </div>
 
+        {/* Program Slot Policy
+*/}
+        <div className="mb-4">
+          <h2 className="text-3xl font-bold text-indigo-600 mb-6 pb-3 border-b border-indigo-200">
+            Program Slot Policy
+
+          </h2>
+          <p className="mb-4 text-gray-700 leading-relaxed">
+           No changes to allocated slots will be allowed once the official program schedule (Agenda) is released.
+          </p>
+          
+        </div>
         {/* Cancellation Policy Section */}
         <div className="mb-4">
           <h2 className="text-3xl font-bold text-indigo-600 mb-6 pb-3 border-b border-indigo-200">
