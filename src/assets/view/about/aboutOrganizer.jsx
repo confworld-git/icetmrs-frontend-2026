@@ -32,17 +32,17 @@ export default function AboutCERADA() {
     {
       title: "Student Membership",
       icon: "🎓",
-      link: "https://confworld.org/student",
+      link: "https://confworld.org/student-membership",
     },
     {
       title: "Professional Membership",
       icon: "💼",
-      link: "https://confworld.org/professional",
+      link: "https://confworld.org/professional-membership",
     },
     {
       title: "Institutional Membership",
       icon: "🏛️",
-      link: "https://confworld.org/institutional",
+      link: "https://confworld.org/institutional-membership",
     },
   ];
 

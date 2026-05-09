@@ -82,7 +82,7 @@ function Footer() {
               <h3 className="text-amber-400 font-bold mb-4 text-lg">Follow Us</h3>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="https://www.facebook.com/people/Confworld-Educational-Research-and-Development-Association/61560894663027/" className="hover:text-amber-400 transition-colors flex items-center gap-2">
+                  <a href="https://www.facebook.com/profile.php?id=61588892235690" className="hover:text-amber-400 transition-colors flex items-center gap-2">
                     <FaFacebookF className="text-white hover:text-amber-400" /> Facebook
                   </a>
                 </li>
