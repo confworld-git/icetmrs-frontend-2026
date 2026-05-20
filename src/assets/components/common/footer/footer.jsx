@@ -129,7 +129,7 @@ function Footer() {
               <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-amber-400/30">
                 <h4 className="text-xs font-bold text-amber-400 mb-1">Organizer Address:</h4>
                 <p className="text-xs leading-relaxed">
-                  No.147/383A, Second Floor, Paper Mills Road, Peravallur, Chennai-600082, Tamil Nadu, India.
+                  No. 25/4,First Floor, Madhavaram High Road, Perambur, Chennai - 600011,Tamil Nadu, India.
                 </p>
               </div>
             </div>
