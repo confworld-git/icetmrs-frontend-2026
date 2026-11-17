@@ -121,7 +121,7 @@ export default function TopNavbar() {
   {
     title: "Apply for Academic Partner",
     icon: academic,
-    link: "/contact-us",
+    link: "/academic-partner",
     alt: "apply-for-academic-partner-icon",
   },
 ];

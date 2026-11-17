@@ -27,11 +27,11 @@ export default function Navigation() {
 
   return (
     <>
-      <nav className="bg-indigo-600 fixed top-6 lg:top-18 left-0 right-0 z-40 py-3 px-4 ">
+      <nav className="bg-[#1F06AC] fixed top-6 lg:top-18 left-0 right-0 z-40 py-3 px-4 ">
         <div className="w-full mx-auto flex items-center md:gap-x- justify-between">
           <a href="/" className="flex-shrink-0" onClick={closeMobileMenu}>
             <img
-              src="/images/logo/icetmrslogo1.png"
+              src="/images/logo/icetmrslogo1.jpg"
               alt="ICETMRS Conference Logo"
               className="h-12  lg:h-16 w-auto max-w-[180px] lg:max-w-[210px]"
             />

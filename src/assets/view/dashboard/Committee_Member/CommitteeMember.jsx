@@ -24,9 +24,6 @@ const CommitteeMember = () => {
       );
       if (res.status === 200) {
         setMemberData(res.data.data);
-        toaster.success(
-          res.data.message || "Committee member data fetched successfully!"
-        );
       } else {
         toaster.warning(`Failed to fetch data: ${res.statusText}`);
         setError(`Failed to fetch data: ${res.statusText}`);

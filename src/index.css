@@ -4,8 +4,8 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --color-primary: #50828d;
-  --color-secondary: #94bdb7;
+  --color-primary: #1F06AC;
+  --color-secondary: #aa0053;
   --color-tertiary: #edebec;
   --color-accent: #e1ad37;
   --color-heading: #0096a7;

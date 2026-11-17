@@ -3,9 +3,16 @@ import axios from "axios";
 
 const CouponManagement = () => {
   const [coupons, setCoupons] = useState([]);
-  const [form, setForm] = useState({ code: "", description: "", usageLimit: "", expiresAt: "" });
+  const [form, setForm] = useState({
+    code: "",
+    description: "",
+    usageLimit: "",
+    expiresAt: "",
+  });
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const API = import.meta.env.VITE_API_URL;
 
@@ -49,7 +56,9 @@ const CouponManagement = () => {
   };
 
   const handleToggle = async (coupon) => {
-    await axios.put(`${API}/coupon/${coupon._id}`, { isActive: !coupon.isActive });
+    await axios.put(`${API}/coupon/${coupon._id}`, {
+      isActive: !coupon.isActive,
+    });
     fetchCoupons();
   };
 
@@ -63,9 +72,22 @@ const CouponManagement = () => {
     });
   };
 
+  const filtered = coupons.filter((c) => {
+    const matchesSearch = c.code.includes(searchTerm.toUpperCase());
+    const matchesStatus =
+      statusFilter === "all"
+        ? true
+        : statusFilter === "active"
+          ? c.isActive
+          : !c.isActive;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold text-indigo-700 mb-6">Coupon Management</h1>
+      <h1 className="text-2xl font-bold text-indigo-700 mb-6">
+        Coupon Management
+      </h1>
 
       {/* Form */}
       <form
@@ -73,12 +95,16 @@ const CouponManagement = () => {
         className="bg-white shadow rounded-lg p-5 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4"
       >
         <div>
-          <label className="block text-sm font-medium mb-1">Coupon Code *</label>
+          <label className="block text-sm font-medium mb-1">
+            Coupon Code *
+          </label>
           <input
             required
             className="w-full border rounded p-2 uppercase"
             value={form.code}
-            onChange={(e) => setForm({ ...form, code: e.target.value.toUpperCase() })}
+            onChange={(e) =>
+              setForm({ ...form, code: e.target.value.toUpperCase() })
+            }
             placeholder="e.g. SAVE5"
             disabled={!!editId}
           />
@@ -93,7 +119,9 @@ const CouponManagement = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Usage Limit (blank = unlimited)</label>
+          <label className="block text-sm font-medium mb-1">
+            Usage Limit (blank = unlimited)
+          </label>
           <input
             type="number"
             className="w-full border rounded p-2"
@@ -104,7 +132,9 @@ const CouponManagement = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Expires At (blank = never)</label>
+          <label className="block text-sm font-medium mb-1">
+            Expires At (blank = never)
+          </label>
           <input
             type="date"
             className="w-full border rounded p-2"
@@ -125,7 +155,12 @@ const CouponManagement = () => {
               type="button"
               onClick={() => {
                 setEditId(null);
-                setForm({ code: "", description: "", usageLimit: "", expiresAt: "" });
+                setForm({
+                  code: "",
+                  description: "",
+                  usageLimit: "",
+                  expiresAt: "",
+                });
               }}
               className="px-6 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
             >
@@ -136,6 +171,23 @@ const CouponManagement = () => {
       </form>
 
       {/* Table */}
+      <div className="mb-4 flex gap-3 items-center">
+        <input
+          className="border rounded p-2 w-64 uppercase"
+          placeholder="Search by code"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <select
+          className="border rounded p-2"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+        >
+          <option value="all">All</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
       <div className="bg-white shadow rounded-lg overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-indigo-700 text-white">
@@ -149,15 +201,20 @@ const CouponManagement = () => {
             </tr>
           </thead>
           <tbody>
-            {coupons.map((c, i) => (
-              <tr key={c._id} className={i % 2 === 0 ? "bg-gray-50" : "bg-white"}>
+            {filtered.map((c, i) => (
+              <tr
+                key={c._id}
+                className={i % 2 === 0 ? "bg-gray-50" : "bg-white"}
+              >
                 <td className="p-3 font-mono font-bold">{c.code}</td>
                 <td className="p-3 text-center">{c.discountPercent}%</td>
                 <td className="p-3 text-center">
                   {c.usedCount} / {c.usageLimit ?? "∞"}
                 </td>
                 <td className="p-3 text-center">
-                  {c.expiresAt ? new Date(c.expiresAt).toLocaleDateString() : "Never"}
+                  {c.expiresAt
+                    ? new Date(c.expiresAt).toLocaleDateString()
+                    : "Never"}
                 </td>
                 <td className="p-3 text-center">
                   <span

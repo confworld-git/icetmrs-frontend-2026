@@ -2,28 +2,29 @@ export const journalPackages = [
   {
     id: "q1",
     tier: "Q1 Indexed Journal",
-    specialPrice: 2500,
-    regularPrice: 3000,
+    specialPrice: 3000,
+    regularPrice: 3500,
   },
   {
     id: "q2",
     tier: "Q2 Indexed Journal",
-    specialPrice: 1600,
-    regularPrice: 2000,
+    specialPrice: 2000,
+    regularPrice: 2500,
   },
   {
     id: "q3",
     tier: "Q3 Indexed Journal",
-    specialPrice: 1300,
-    regularPrice: 1500,
+    specialPrice: 1600,
+    regularPrice: 2000,
   },
   {
     id: "q4",
     tier: "Q4 Indexed Journal",
-    specialPrice: 800,
-    regularPrice: 1000,
+    specialPrice: 1000,
+    regularPrice: 1500,
   },
 ];
+
 
 export const addonsList = [
   {

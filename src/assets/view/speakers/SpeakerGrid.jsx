@@ -101,7 +101,7 @@ const Speakers = () => {
               ({ image, name, title, title2, title3, title4, title5, title6, country, back }, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 p-5 flex flex-col items-center h-[450px] border border-green-100"
+                  className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 hover:scale-105 p-5 flex flex-col items-center h-auto border border-green-100"
                 >
                   {/* Speaker Image */}
                   <img
@@ -117,7 +117,7 @@ const Speakers = () => {
                   />
 
                   {/* Speaker Name */}
-                  <h2 className="text-base font-semibold text-center mb-2 min-h-[40px] flex items-center text-indigo-700">
+                  <h2 className="text-base font-semibold text-center flex items-center text-indigo-700">
                     {name}
                   </h2>
 

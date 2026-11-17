@@ -26,12 +26,12 @@ const EssentialDownload = () => {
   return (
     <section>
       <Hero
-              title="Essential Downloads"
-              breadcrumbs={[{ label: "Home", link: "#" }]}
-              backgroundImage="/images/commonhero/7.webp"
-            />
-<section className="w-full  bg-gray-50 flex flex-col items-center">
-      {/* <Helmet>
+        title="Essential Downloads"
+        breadcrumbs={[{ label: "Home", link: "#" }]}
+        backgroundImage="/images/commonhero/7.webp"
+      />
+      <section className="w-full  bg-gray-50 flex flex-col items-center">
+        {/* <Helmet>
         <title>
           ICLSMHA 2026 Downloads | Abstract Template, Brochure & Registration
         </title>
@@ -51,46 +51,52 @@ const EssentialDownload = () => {
 
       </Helmet> */}
 
-    
-      {/* Cards */}
-      <div className=" w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 py-16 px-4">
-        {downloadList.map((item, i) => (
-          <div
-            key={i}
-            data-aos="zoom-in"
-            data-aos-delay={i * 100}
-            className="flex flex-col justify-between items-center bg-indigo-50 rounded-xl border border-gray-200 shadow hover:shadow-xl transition-shadow p-6"
-          >
-            <h2 className="font-semibold text-center text-lg text-indigo-800 min-h-[44px] flex items-center">
-              {item.title}
-            </h2>
-            {item.file ? (
-              <a
-                href={`/files/${item.file}`}
-                download
-                className="mt-6 flex items-center gap-2 hover:bg-white bg-indigo-700  duration-500 text-white hover:text-indigo-600 text-base font-semibold px-5 py-2 rounded-md shadow-sm transition"
-              >
-                <img src={download_svg} alt="" className="w-5 h-5" />
-                Download
-              </a>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setPopup(true)}
-                className="mt-6 flex items-center gap-2 bg-indigo-700 hover:bg-white text-white hover:text-indigo-600 duration-500 text-base font-semibold px-5 py-2 rounded-md shadow-sm transition"
-              >
-                <img src={download_svg} alt="" className="w-5 h-5" />
-                Download
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
+        {/* Cards */}
+        <div className=" w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 py-16 px-4">
+          {downloadList.map((item, i) => (
+            <div
+              key={i}
+              data-aos="zoom-in"
+              data-aos-delay={i * 100}
+              className="flex flex-col justify-between items-center bg-indigo-50 rounded-xl border border-gray-200 shadow hover:shadow-xl transition-shadow p-6"
+            >
+              <h2 className="font-semibold text-center text-lg text-indigo-800 min-h-[44px] flex items-center">
+                {item.title}
+              </h2>
+              {item.file ? (
+                <a
+                  href={`/files/${item.file}`}
+                  download
+                  className="group mt-6 flex items-center gap-2 hover:bg-white bg-indigo-700 duration-500 text-white hover:text-indigo-600 text-base font-semibold px-5 py-2 rounded-md shadow-sm transition"
+                >
+                  <img
+                    src={download_svg}
+                    alt=""
+                    className="w-5 h-5 transition duration-300 group-hover:brightness-0"
+                  />
+                  Download
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setPopup(true)}
+                  className="group mt-6 flex items-center gap-2 bg-indigo-700 hover:bg-white text-white hover:text-indigo-600 duration-500 text-base font-semibold px-5 py-2 rounded-md shadow-sm transition"
+                >
+                  <img
+                    src={download_svg}
+                    alt=""
+                    className="w-5 h-5 transition duration-300 group-hover:brightness-0"
+                  />
+                  Download
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
 
-      {popup && <Downloadform setPopup={setPopup} />}
+        {popup && <Downloadform setPopup={setPopup} />}
+      </section>
     </section>
-    </section>
-    
   );
 };
 

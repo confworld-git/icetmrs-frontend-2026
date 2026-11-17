@@ -20,6 +20,8 @@ import TermsandConditions from "./assets/view/registration/TermsandConditions";
 import FAQ from "./assets/view/faq/faq";
 import Venue from "./assets/view/venue/Venue";
 import Contactus from "./assets/view/contact-us/Contact-us";
+import AcademicPartner from "./assets/view/academic-partner/AcademicPartner";
+import ThankYou from "./assets/view/thank-you/ThankYou";
 import Speakers from "./assets/view/speakers/Speakers";
 import Speakerlist from "./assets/view/speakers/SpeakerGrid";
 import Sponsors from "./assets/view/sponsors/Sponsors";
@@ -32,7 +34,6 @@ import Protected from "./assets/view/protected/Protected";
 import DashboardLayout from "./assets/view/dashboard/Dashboard_Layout/DashboardLayout";
 import Dashboard from "./assets/view/dashboard/Dashboard";
 import DRegistration from "./assets/view/dashboard/registration/Registration";
-import DSpeakers from "./assets/view/dashboard/speakers/Speakers";
 import DSubmission from "./assets/view/dashboard/submission/Submission";
 import DCommitteeMember from "./assets/view/dashboard/Committee_Member/CommitteeMember";
 import DContact from "./assets/view/dashboard/contact/Contact";
@@ -116,12 +117,14 @@ function App() {
             element={<RegistrationInstructions />}
           />
           <Route path="terms-and-conditions" element={<TermsandConditions />} />
-          <Route path="payment-details-success" element={<Success />} />
+          <Route path="payment-details-success" element={<ThankYou />} />
+          <Route path="thank-you" element={<ThankYou />} />
 
           {/* Other Pages */}
           <Route path="faq" element={<FAQ />} />
           <Route path="venue" element={<Venue />} />
           <Route path="contact-us" element={<Contactus />} />
+          <Route path="academic-partner" element={<AcademicPartner />} />
 
           <Route
             path="*"
@@ -138,7 +141,6 @@ function App() {
           <Route path="/Dashboard" element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="Registration" element={<DRegistration />} />
-            <Route path="Speakers" element={<DSpeakers />} />
             <Route path="Submission" element={<DSubmission />} />
             <Route path="CommitteeMember" element={<DCommitteeMember />} />
             <Route path="Contact" element={<DContact />} />

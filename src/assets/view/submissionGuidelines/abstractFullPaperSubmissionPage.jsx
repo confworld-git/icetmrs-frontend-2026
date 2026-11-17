@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Hero from "../../components/common/common-hero/common-hero";
 import { toaster } from "evergreen-ui";
@@ -10,6 +11,7 @@ import { Helmet } from "react-helmet";
 const AbstractFullPaperSubmission = () => {
   
   const SubmissionRef = useRef();
+  const navigate = useNavigate();
   const [mobile, setMobile] = useState("");
 
   const generateSubmissionID = () => {
@@ -115,7 +117,16 @@ const AbstractFullPaperSubmission = () => {
       );
       SubmissionRef.current.reset();
       setMobile("");
-      toaster.success(response.data.message);
+      toaster.success(response.data.message || "Paper submitted successfully!");
+      navigate("/thank-you", {
+        state: {
+          type: "submission",
+          name: formValues["authorName"] || "Author",
+          id: newSubmissionID,
+          title: formValues["paper_title"] || "Submitted Paper",
+          paymentStatus: "Submission Verified"
+        }
+      });
     } catch (error) {
       toaster.danger("Something's wrong");
     }

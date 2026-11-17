@@ -3,11 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Google Tag Manager -->
+    <script>
+      (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
+        w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" });
+        var f = d.getElementsByTagName(s)[0],
+          j = d.createElement(s),
+          dl = l != "dataLayer" ? "&l=" + l : "";
+        j.async = true;
+        j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl;
+        f.parentNode.insertBefore(j, f);
+      })(window, document, "script", "dataLayer", "GTM-PMRSB3M3");
+    </script>
+    <!-- End Google Tag Manager -->
+
     <meta
       name="google-site-verification"
       content="QbRx1ZRJYxMm-6PKuZrRRAtJrTpkgkNQi8ih0tUvI34"
     />
-    
     <title>ICETMRS</title>
     <meta
       name="description"
@@ -27,23 +42,14 @@
     />
     <meta
       property="og:description"
-      content="The International Conference on International Conference on Emerging Trends in Multidisciplinary Research Studies (ICETMRS) is a prestigious hybrid event taking place in Istanbul, Turkey on 19-20 Nov, 2025 which is Organized by CERADA (Confworld Educational Research and Development Association). Conference Theme: Sustainable Learning Through Multidisciplinary Research and Technological Innovation. This conference welcomes research scholars, professionals, students and scientists from diverse fields such as STEM (Science, Technology, Engineering & Mathematics), Education, Teaching-Learning relationship, Life Science and Innovation, Social Science and Humanities, Business & Management Studies.    "/>
-     <meta property="og:image" content="/images/logo/icetmrslogo1.png" />
+      content="The International Conference on International Conference on Emerging Trends in Multidisciplinary Research Studies (ICETMRS) is a prestigious hybrid event taking place in Istanbul, Turkey on 19-20 Nov, 2025 which is Organized by CERADA (Confworld Educational Research and Development Association). Conference Theme: Sustainable Learning Through Multidisciplinary Research and Technological Innovation. This conference welcomes research scholars, professionals, students and scientists from diverse fields such as STEM (Science, Technology, Engineering & Mathematics), Education, Teaching-Learning relationship, Life Science and Innovation, Social Science and Humanities, Business & Management Studies."
+    />
+    <meta
+      property="og:image"
+      content="https://icetmrs.com/images/logo/icetmrslogo1.png"
+    />
     <meta property="og:url" content="https://icetmrs.com/" />
-    <meta property="og:type" content="website" /> 
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-T45VG5JYWV"
-    ></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
-
-      gtag("config", "G-T45VG5JYWV");
-    </script>
+    <meta property="og:type" content="website" />
     <link href="/dist/main.css" rel="stylesheet" />
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link
@@ -52,6 +58,17 @@
     />
   </head>
   <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript
+      ><iframe
+        src="https://www.googletagmanager.com/ns.html?id=GTM-PMRSB3M3"
+        height="0"
+        width="0"
+        style="display: none; visibility: hidden"
+      ></iframe
+    ></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>

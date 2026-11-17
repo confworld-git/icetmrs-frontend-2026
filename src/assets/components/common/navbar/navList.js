@@ -115,7 +115,7 @@ export const topNavList = [
   {
     title: "Apply for Academic Partner",
     icon: "/icons/apply-for-academic-partner.webp",
-    link: "/contact-us",
+    link: "/academic-partner",
     alt: "apply-for-academic-partner-icon",
   },
 ];

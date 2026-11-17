@@ -1,5 +1,5 @@
 import { PureComponent, useState } from "react";
-
+import AcademicPartnerCard from "../components/home/academicPartner";
 import HeroSection from "../components/home/heroSection";
 import Sdg from "../components/home/sgd";
 import Welcome from "../components/home/welcome";
@@ -148,7 +148,10 @@ export default function HomePage() {
       <HeroSection />
       <Sdg />
       <LogoMarquee/>
+      <AcademicPartnerCard />
+      <Journals />
       <Welcome />
+      
       {/* <PurposeOfConference /> */}
       <KeyHighlights />
       {/* <ObjectiveConference /> */}
@@ -158,7 +161,7 @@ export default function HomePage() {
       {/* <RegistrationSteps /> */}
       {/* <RegisterSteps /> */}
       <Proceedings />
-      <Journals />
+      
     </div>
   );
 }

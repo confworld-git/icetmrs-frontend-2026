@@ -1,6 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, EffectFade, Navigation, Pagination } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/effect-fade";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 export default function HeroSection() {
+  const mobileSwiperRef = useRef(null);
+  const desktopSwiperRef = useRef(null);
+
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -9,7 +19,7 @@ export default function HeroSection() {
   });
 
   useEffect(() => {
-    const targetDate = new Date("2026-11-16T00:00:00").getTime();
+    const targetDate = new Date("2027-10-18T00:00:00").getTime();
 
     const timer = setInterval(() => {
       const now = new Date().getTime();
@@ -18,10 +28,10 @@ export default function HeroSection() {
       if (difference > 0) {
         const days = Math.floor(difference / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
-          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          (difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
         );
         const minutes = Math.floor(
-          (difference % (1000 * 60 * 60)) / (1000 * 60)
+          (difference % (1000 * 60 * 60)) / (1000 * 60),
         );
         const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
@@ -34,6 +44,14 @@ export default function HeroSection() {
 
     return () => clearInterval(timer);
   }, []);
+
+  const heroSlides = [
+    "/images/commonhero/10.webp",
+    "/images/commonhero/1.webp",
+    "/images/commonhero/2.webp",
+    "/images/commonhero/3.webp",
+    "/images/commonhero/4.webp",
+  ];
 
   return (
     <section>
@@ -67,12 +85,12 @@ export default function HeroSection() {
             {/* Left Content */}
             <div className="space-y-4 py-4 lg:py-8">
               {/* Main Title */}
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-indigo-800">
-                2<sup>nd</sup> International Conference on Emerging Trends in Multidisciplinary
-                Research Studies
-                <span className="text-lg sm:text-xl lg:text-3xl text-amber-500 mt-2">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#1F06AC]">
+                2<sup>nd</sup> International Conference on Emerging Trends in
+                Multidisciplinary Research Studies
+                <span className="text-lg sm:text-xl lg:text-3xl text-[#aa0053] mt-2">
                   {" "}
-                  (ICETMRS-2026)
+                  (ICETMRS-2027)
                 </span>
               </h1>
 
@@ -85,12 +103,18 @@ export default function HeroSection() {
                     Technological Innovation"
                   </span>
                 </p>
-                <p className="text-base sm:text-lg font-semibold text-amber-600">
+                <p className="text-base sm:text-lg font-semibold text-[#aa0053]">
                   Hybrid Conference: In Person + Online
                 </p>
                 <p className="text-base sm:text-lg">
                   <span className="font-bold">Organized by: </span>
                   <span className="font-semibold">
+                    {" "}
+                    GlobalNxt University, Malaysia and
+                  </span>{" "}
+                  <br />
+                  <span className="font-semibold">
+                    {" "}
                     Confworld Educational Research and Development Association
                   </span>
                 </p>
@@ -103,7 +127,7 @@ export default function HeroSection() {
               {/* Conference Details - Simple Modern Cards */}
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4">
                 {/* Date Card */}
-                <div className="flex items-center gap-3 bg-indigo-600 px-4 py-3 rounded-xl shadow-md border-l-4 border-indigo-600 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-3 bg-[#1F06AC] px-4 py-3 rounded-xl shadow-md border-l-4 border-indigo-600 hover:shadow-lg transition-shadow">
                   <div className="bg-indigo-100 p-2 rounded-lg">
                     <svg
                       className="w-5 h-5 text-indigo-600"
@@ -124,16 +148,16 @@ export default function HeroSection() {
                       Date
                     </span>
                     <p className="text-sm sm:text-base font-bold text-white">
-                      16–17 Nov, 2026
+                      18–19 Oct, 2027
                     </p>
                   </div>
                 </div>
 
                 {/* Location Card */}
-                <div className="flex items-center gap-3 bg-amber-500 px-4 py-3 rounded-xl shadow-md border-l-4 border-amber-500 hover:shadow-lg transition-shadow">
+                <div className="flex items-center gap-3 bg-[#aa0053] px-4 py-3 rounded-xl shadow-md border-l-4 border-[#aa0053] hover:shadow-lg transition-shadow">
                   <div className="bg-amber-100 p-2 rounded-lg">
                     <svg
-                      className="w-5 h-5 text-amber-600"
+                      className="w-5 h-5 text-[#aa0053]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -151,7 +175,7 @@ export default function HeroSection() {
                       Location
                     </span>
                     <p className="text-sm sm:text-base font-bold text-white">
-                      Istanbul, Turkey
+                      Seoul, South Korea
                     </p>
                   </div>
                 </div>
@@ -185,7 +209,7 @@ export default function HeroSection() {
                         >
                           {item.value.toString().padStart(2, "0")}
                         </div>
-                        <span className="text-xs text-violet-500 font-medium uppercase tracking-wide">
+                        <span className="text-xs text-[#1F06AC] font-medium uppercase tracking-wide">
                           {item.label}
                         </span>
                       </div>
@@ -199,31 +223,89 @@ export default function HeroSection() {
             <div className="flex justify-center lg:justify-end py-6 lg:py-0">
               <div className="relative w-full max-w-lg lg:max-w-none">
                 {/* Mobile Video */}
-                <div className="lg:hidden w-full aspect-video overflow-hidden border-2 border-indigo-800 shadow-lg">
-                  <video
-                    src="/videos/icetmrs-hero-video.webm"
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="none"
-                  />
+                <div className="lg:hidden w-full aspect-video overflow-hidden border-2 border-indigo-800 shadow-lg rounded-xl relative group">
+                  <Swiper
+                    onSwiper={(swiper) => (mobileSwiperRef.current = swiper)}
+                    modules={[Autoplay, EffectFade, Navigation, Pagination]}
+                    effect="fade"
+                    pagination={{ clickable: true }}
+                    autoplay={{ delay: 3500, disableOnInteraction: false }}
+                    loop={true}
+                    className="w-full h-full"
+                    style={{
+                      "--swiper-navigation-color": "#fbbf24",
+                      "--swiper-pagination-color": "#fbbf24",
+                      "--swiper-navigation-size": "20px",
+                    }}
+                  >
+                    {heroSlides.map((src, index) => (
+                      <SwiperSlide key={index}>
+                        <img
+                          src={src}
+                          alt={`Conference Slide ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                  {/* Mobile Navigation Buttons */}
+                  <button
+                    onClick={() => mobileSwiperRef.current?.slidePrev()}
+                    className="hero-mobile-prev absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md text-indigo-800 hover:bg-white transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <button
+                    onClick={() => mobileSwiperRef.current?.slideNext()}
+                    className="hero-mobile-next absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 bg-white/90 rounded-full flex items-center justify-center shadow-md text-indigo-800 hover:bg-white transition-all opacity-0 group-hover:opacity-100"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
                 </div>
 
                 {/* Desktop Video */}
                 <div className="hidden py-12 lg:block w-full h-[500px] mx-auto">
                   <div className="w-full mx-auto h-auto bg-gradient-to-br from-indigo-700 to-indigo-600 rounded-2xl shadow-2xl p-1">
-                    <div className="w-full h-auto bg-indigo-800 overflow-hidden ring-2 ring-amber-400 ring-offset-2 ring-offset-indigo-700">
-                      <video
-                        src="/videos/icetmrs-hero-video.webm"
-                        className="w-full h-auto object-fit"
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        preload="none"
-                      />
+                    <div className="w-full h-[400px] bg-indigo-800 overflow-hidden ring-2 ring-[#aa0053] ring-offset-2 ring-offset-indigo-700 rounded-xl relative group">
+                      <Swiper
+                        onSwiper={(swiper) =>
+                          (desktopSwiperRef.current = swiper)
+                        }
+                        modules={[Autoplay, EffectFade, Navigation, Pagination]}
+                        effect="fade"
+                        pagination={{ clickable: true }}
+                        autoplay={{ delay: 4000, disableOnInteraction: false }}
+                        loop={true}
+                        className="w-full h-full"
+                        style={{
+                          "--swiper-navigation-color": "#fbbf24",
+                          "--swiper-pagination-color": "#fbbf24",
+                          "--swiper-navigation-size": "30px",
+                        }}
+                      >
+                        {heroSlides.map((src, index) => (
+                          <SwiperSlide key={index}>
+                            <img
+                              src={src}
+                              alt={`Conference Slide ${index + 1}`}
+                              className="w-full h-full object-cover"
+                            />
+                          </SwiperSlide>
+                        ))}
+                      </Swiper>
+                      {/* Desktop Navigation Buttons */}
+                      <button
+                        onClick={() => desktopSwiperRef.current?.slidePrev()}
+                        className="hero-desktop-prev absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-xl text-indigo-800 hover:bg-indigo-50 transition-all transform hover:scale-110 opacity-0 group-hover:opacity-100"
+                      >
+                        <ChevronLeft size={24} />
+                      </button>
+                      <button
+                        onClick={() => desktopSwiperRef.current?.slideNext()}
+                        className="hero-desktop-next absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 bg-white rounded-full flex items-center justify-center shadow-xl text-indigo-800 hover:bg-indigo-50 transition-all transform hover:scale-110 opacity-0 group-hover:opacity-100"
+                      >
+                        <ChevronRight size={24} />
+                      </button>
                     </div>
                   </div>
                 </div>

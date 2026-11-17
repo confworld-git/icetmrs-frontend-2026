@@ -23,9 +23,6 @@ const Submission = () => {
       );
       if (res.status === 200) {
         setSubmissionData(res.data.data);
-        toaster.success(
-          res.data.message || "Paper submission data fetched successfully!"
-        );
       } else {
         toaster.warning(`Failed to fetch data: ${res.statusText}`);
         setError(`Failed to fetch data: ${res.statusText}`);

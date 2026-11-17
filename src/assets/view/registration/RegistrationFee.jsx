@@ -17,11 +17,22 @@ import Addons from "./Addons.jsx";
 // ─── Pricing Calculator ───────────────────────────────────────────────────────
 // combinedBase = fee table value + journal amount + addons amount
 // Discounts are applied to the combinedBase so journal/addon costs also get reduced.
-const calculatePricing = ({ baseAmount, journalAmount = 0, addonsAmount = 0, participantCategory, hasMembership, hasCoupon }) => {
+const calculatePricing = ({
+  baseAmount,
+  journalAmount = 0,
+  addonsAmount = 0,
+  participantCategory,
+  hasMembership,
+  couponDiscountAmount = 0,
+}) => {
   const base = parseFloat(baseAmount);
   const journal = parseFloat(journalAmount) || 0;
   const addons = parseFloat(addonsAmount) || 0;
-  const membershipFeeAmount = participantCategory?.toLowerCase().includes("student") ? 15 : 20;
+  const membershipFeeAmount = participantCategory
+    ?.toLowerCase()
+    .includes("student")
+    ? 15
+    : 20;
 
   let calc = {
     baseAmount: base,
@@ -34,25 +45,26 @@ const calculatePricing = ({ baseAmount, journalAmount = 0, addonsAmount = 0, par
     total: base,
   };
 
-  // Discounts on BASE ONLY
-  if (hasMembership && hasCoupon) {
-    calc.totalDiscount = base * 0.10;
-    calc.membershipFee = membershipFeeAmount;
+  // Membership discount and promotional coupons apply to the registration fee only.
+  if (hasMembership) {
     calc.membershipDiscount = base * 0.05;
-    calc.couponDiscount = base * 0.05;
-  } else if (hasMembership) {
-    calc.membershipDiscount = base * 0.05;
-    calc.totalDiscount = calc.membershipDiscount;
     calc.membershipFee = membershipFeeAmount;
-  } else if (hasCoupon) {
-    calc.couponDiscount = base * 0.05;
-    calc.totalDiscount = calc.couponDiscount;
   }
 
-  const discountedBase = base - calc.totalDiscount;
+  const afterMembershipDiscount = Math.max(0, base - calc.membershipDiscount);
+  const safeCouponDiscount = Math.min(
+    Number(couponDiscountAmount) || 0,
+    Math.max(0, afterMembershipDiscount),
+  );
+  calc.couponDiscount = safeCouponDiscount;
+  calc.totalDiscount = calc.membershipDiscount + calc.couponDiscount;
+  const discountedBase = Math.max(
+    0,
+    afterMembershipDiscount - calc.couponDiscount,
+  );
   calc.finalAmount = discountedBase + journal + addons + calc.membershipFee;
 
-  const bankTax = calc.finalAmount * 0.060;
+  const bankTax = calc.finalAmount * 0.06;
   calc.bankTax = parseFloat(bankTax.toFixed(2));
   calc.total = parseFloat((calc.finalAmount + bankTax).toFixed(2));
 
@@ -80,7 +92,9 @@ const CheckoutPanel = ({
   selectedAddons,
   registrationBase,
 }) => {
-  const membershipFee = participantCategory?.toLowerCase().includes("student") ? 15 : 20;
+  const membershipFee = participantCategory?.toLowerCase().includes("student")
+    ? 15
+    : 20;
   const journalAmount = selectedJournal?.specialPrice || 0;
   const addonsAmount = selectedAddons.reduce((sum, a) => sum + a.price, 0);
 
@@ -96,7 +110,9 @@ const CheckoutPanel = ({
             <p className="text-sm text-indigo-600 mt-0.5">
               Get 5% discount on registration fee
             </p>
-            <p className="text-sm font-bold text-indigo-700 mt-2">Fee: ${membershipFee}</p>
+            <p className="text-sm font-bold text-indigo-700 mt-2">
+              Fee: ${membershipFee}
+            </p>
           </div>
           <button
             type="button"
@@ -119,8 +135,12 @@ const CheckoutPanel = ({
       {/* Coupon Card */}
       <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm">
         <h3 className="text-[15px] font-bold text-indigo-700 mb-1">
-          Get 5% Discount with a coupon code!
+          Registration coupon
         </h3>
+        <p className="text-sm text-indigo-600">
+          Get $50 OFF your registration with coupon code ID50. Valid until 31
+          August 2026.
+        </p>
         {couponStatus === "valid" ? (
           <div className="flex items-center justify-between bg-indigo-100 border border-indigo-300 rounded-xl px-4 py-3 mt-2">
             <span className="text-indigo-700 font-semibold text-sm">
@@ -153,19 +173,22 @@ const CheckoutPanel = ({
           </div>
         )}
         {couponStatus === "invalid" && (
-          <p className="text-red-500 text-xs mt-1">✗ Invalid or expired coupon code.</p>
+          <p className="text-red-500 text-xs mt-1">
+            ✗ Invalid or expired coupon code.
+          </p>
         )}
       </div>
 
       {/* Price Breakdown */}
       {baseSelected && (
         <div className="rounded-2xl border border-indigo-200 bg-indigo-50 p-5 shadow-sm">
-          <h3 className="text-[15px] font-bold text-indigo-700 mb-4">Price Breakdown</h3>
+          <h3 className="text-[15px] font-bold text-indigo-700 mb-4">
+            Price Breakdown
+          </h3>
           <div className="space-y-2 text-sm">
-
             {/* Base registration fee */}
             <div className="flex justify-between text-gray-700">
-              <span>Base Registration Fee:</span>
+              <span>Original Registration Fee:</span>
               <span className="font-medium">
                 ${(registrationBase ?? pricing.baseAmount).toFixed(2)}
               </span>
@@ -175,7 +198,9 @@ const CheckoutPanel = ({
             {journalAmount > 0 && (
               <div className="flex justify-between text-gray-700">
                 <span>Journal Support ({selectedJournal?.tier}):</span>
-                <span className="font-medium">+ ${journalAmount.toLocaleString()}</span>
+                <span className="font-medium">
+                  + ${journalAmount.toLocaleString()}
+                </span>
               </div>
             )}
 
@@ -206,26 +231,32 @@ const CheckoutPanel = ({
             {pricing.membershipDiscount > 0 && (
               <div className="flex justify-between text-indigo-700">
                 <span>Membership Discount (5%):</span>
-                <span className="font-semibold">- ${pricing.membershipDiscount.toFixed(2)}</span>
+                <span className="font-semibold">
+                  - ${pricing.membershipDiscount.toFixed(2)}
+                </span>
               </div>
             )}
             {pricing.couponDiscount > 0 && (
               <div className="flex justify-between text-indigo-700">
-                <span>Coupon Discount (5%):</span>
-                <span className="font-semibold">- ${pricing.couponDiscount.toFixed(2)}</span>
+                <span>Coupon Discount:</span>
+                <span className="font-semibold">
+                  - ${pricing.couponDiscount.toFixed(2)}
+                </span>
               </div>
             )}
             {pricing.membershipFee > 0 && (
               <div className="flex justify-between text-gray-700">
                 <span>Membership Fee:</span>
-                <span className="font-medium">+ ${pricing.membershipFee.toFixed(2)}</span>
+                <span className="font-medium">
+                  + ${pricing.membershipFee.toFixed(2)}
+                </span>
               </div>
             )}
 
             <div className="border-t border-indigo-200 my-2" />
 
             <div className="flex justify-between font-bold text-gray-800">
-              <span>Subtotal:</span>
+              <span>Final Registration Fee:</span>
               <span>${pricing.finalAmount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-gray-600">
@@ -253,7 +284,8 @@ const CheckoutPanel = ({
 
       {!baseSelected && (
         <div className="rounded-2xl border border-dashed border-indigo-200 bg-indigo-50 p-5 text-center text-sm text-indigo-700">
-          ↑ Select a registration fee from the table above to see your price breakdown.
+          ↑ Select a registration fee from the table above to see your price
+          breakdown.
         </div>
       )}
     </div>
@@ -272,7 +304,11 @@ const RegistrationFee = () => {
       script.async = true;
       document.body.appendChild(script);
     };
-    if (!document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]')) {
+    if (
+      !document.querySelector(
+        'script[src="https://checkout.razorpay.com/v1/checkout.js"]',
+      )
+    ) {
       loadRazorpay();
     }
   }, []);
@@ -315,22 +351,28 @@ const RegistrationFee = () => {
 
   // ── Derived pricing ─────────────────────────────────────────────────────────
   // Remove combinedBase entirely
-const journalAmount = selectedJournal?.specialPrice || 0;
-const addonsAmount = selectedAddons.reduce((sum, a) => sum + a.price, 0);
+  const journalAmount = selectedJournal?.specialPrice || 0;
+  const addonsAmount = selectedAddons.reduce((sum, a) => sum + a.price, 0);
 
-const pricing = selectedBase
-  ? calculatePricing({
-      baseAmount: selectedBase.value,   // base fee ONLY
-      journalAmount,
-      addonsAmount,
-      participantCategory,
-      hasMembership: membership,
-      hasCoupon: couponDiscount > 0,
-    })
-  : {
-      baseAmount: 0, membershipDiscount: 0, couponDiscount: 0,
-      membershipFee: 0, totalDiscount: 0, finalAmount: 0, bankTax: 0, total: 0,
-    };
+  const pricing = selectedBase
+    ? calculatePricing({
+        baseAmount: selectedBase.value, // base fee ONLY
+        journalAmount,
+        addonsAmount,
+        participantCategory,
+        hasMembership: membership,
+        couponDiscountAmount: couponDiscount,
+      })
+    : {
+        baseAmount: 0,
+        membershipDiscount: 0,
+        couponDiscount: 0,
+        membershipFee: 0,
+        totalDiscount: 0,
+        finalAmount: 0,
+        bankTax: 0,
+        total: 0,
+      };
 
   const handleBaseSelect = (value, title, category) => {
     setSelectedBase({ value, title, category });
@@ -339,14 +381,24 @@ const pricing = selectedBase
   const handleMembershipToggle = (checked) => setMembership(checked);
 
   const handleCouponApply = async () => {
-    if (!couponCode.trim()) return;
+    const normalizedCode = couponCode.trim();
+    if (!normalizedCode) {
+      setCouponStatus(null);
+      setCouponDiscount(0);
+      setAppliedCouponCode("");
+      return;
+    }
+
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/coupon/validate`, {
-        code: couponCode,
-      });
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/coupon/validate`,
+        {
+          code: normalizedCode,
+        },
+      );
       setCouponStatus("valid");
-      setCouponDiscount(data.discountPercent);
-      setAppliedCouponCode(couponCode);
+      setCouponDiscount(data.discountAmount || 0);
+      setAppliedCouponCode(data.code || normalizedCode.toUpperCase());
       toaster.success(data.message);
     } catch (error) {
       setCouponStatus("invalid");
@@ -388,80 +440,92 @@ const pricing = selectedBase
     }
 
     const selectedFeePayload = {
-      title:              selectedBase.title,
-      category:           selectedBase.category,
-      value:              pricing.baseAmount,       // combinedBase after discount calc
-      convenience_price:  pricing.bankTax,
-      total:              pricing.finalAmount,
-      discountApplied:    membership && couponDiscount > 0 ? 10 : membership || couponDiscount > 0 ? 5 : 0,
-      membershipFee:      pricing.membershipFee,
+      title: selectedBase.title,
+      category: selectedBase.category,
+      value: pricing.baseAmount, // combinedBase after discount calc
+      convenience_price: pricing.bankTax,
+      total: pricing.finalAmount,
+      discountApplied: pricing.totalDiscount,
+      membershipFee: pricing.membershipFee,
       membershipSelected: membership,
-      couponCode:         couponDiscount > 0 ? appliedCouponCode : null,
-      finalTotal:         pricing.total,
+      couponCode: couponDiscount > 0 ? appliedCouponCode : null,
+      couponDiscountAmount: pricing.couponDiscount,
+      finalTotal: pricing.total,
 
       // ── Breakdown fields ────────────────────────────────────────────────────
       registrationBase: selectedBase.value,
       journalSupport: selectedJournal
         ? {
-            tier:    selectedJournal.tier,
+            tier: selectedJournal.tier,
             package: selectedJournal.package,
-            amount:  selectedJournal.specialPrice,
+            amount: selectedJournal.specialPrice,
           }
         : null,
       journalAmount,
       addons: selectedAddons.map((a) => ({
-        label:    a.label,
+        label: a.label,
         sublabel: a.sublabel,
-        amount:   a.price,
+        amount: a.price,
       })),
       addonsAmount,
     };
 
     try {
-      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/registration`, {
-        ...formFields,
-        selectedFee: selectedFeePayload,
-      });
+      const { data } = await axios.post(
+        `${import.meta.env.VITE_API_URL}/registration`,
+        {
+          ...formFields,
+          selectedFee: selectedFeePayload,
+        },
+      );
 
       const options = {
-        key:         import.meta.env.VITE_RAZORPAY_KEY,
-        amount:      data.amount,
-        currency:    "USD",
-        name:        "Confworld Educational Research and Development Association (CERADA)",
+        key: import.meta.env.VITE_RAZORPAY_KEY,
+        amount: data.amount,
+        currency: "USD",
+        name: "Confworld Educational Research and Development Association (CERADA)",
         description: "ICETMRS-2026 Conference Registration",
-        image:       "https://i.postimg.cc/3RcrXjsP/cerada-logo.webp",
-        order_id:    data.order_id,
+        image: "https://i.postimg.cc/3RcrXjsP/cerada-logo.webp",
+        order_id: data.order_id,
         handler: async (response) => {
           try {
-            await axios.post(`${import.meta.env.VITE_API_URL}/payment/validate`, {
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id:   response.razorpay_order_id,
-              razorpay_signature:  response.razorpay_signature,
-              Order_ID:            data.order_id,
-            });
+            await axios.post(
+              `${import.meta.env.VITE_API_URL}/payment/validate`,
+              {
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature,
+                Order_ID: data.order_id,
+              },
+            );
             navigate("/success", {
               state: {
-                amount:    (data.amount / 100).toFixed(2),
+                amount: (data.amount / 100).toFixed(2),
                 paymentId: response.razorpay_payment_id,
               },
             });
           } catch (error) {
-            toaster.danger("Payment verification failed. Please contact support.");
+            toaster.danger(
+              "Payment verification failed. Please contact support.",
+            );
             console.error(error);
           }
         },
         prefill: {
-          name:    formFields.first_name,
-          email:   formFields.email,
+          name: formFields.first_name,
+          email: formFields.email,
           contact: formFields.number,
         },
         theme: { color: "#4f46e5" },
         modal: {
           ondismiss: async () => {
             try {
-              await axios.post(`${import.meta.env.VITE_API_URL}/payment/cancel`, {
-                order_id: data.order_id,
-              });
+              await axios.post(
+                `${import.meta.env.VITE_API_URL}/payment/cancel`,
+                {
+                  order_id: data.order_id,
+                },
+              );
             } catch {}
             toaster.warning("Payment window closed.");
           },
@@ -469,7 +533,9 @@ const pricing = selectedBase
       };
 
       if (!window.Razorpay) {
-        toaster.danger("Payment gateway not available. Please refresh the page.");
+        toaster.danger(
+          "Payment gateway not available. Please refresh the page.",
+        );
         return;
       }
 
@@ -480,7 +546,8 @@ const pricing = selectedBase
       rzp.open();
     } catch (error) {
       toaster.danger(
-        error.response?.data?.message || "Payment processing failed. Please try again."
+        error.response?.data?.message ||
+          "Payment processing failed. Please try again.",
       );
       console.error("Payment error:", error);
     }
@@ -491,9 +558,19 @@ const pricing = selectedBase
     {
       title: "Physical (Onsite) Participants",
       categories: [
-        { category: "Academicians/Delegates/Research Scholars/PhD candidates", earlyBird: 450, final: 500, onspot: 600 },
+        {
+          category: "Academicians/Delegates/Research Scholars/PhD candidates",
+          earlyBird: 450,
+          final: 500,
+          onspot: 600,
+        },
         { category: "UG/PG Students", earlyBird: 400, final: 450, onspot: 550 },
-        { category: "Non-Presenter/Attendee/Listener", earlyBird: 280, final: 300, onspot: 400 },
+        {
+          category: "Non-Presenter/Attendee/Listener",
+          earlyBird: 280,
+          final: 300,
+          onspot: 400,
+        },
       ],
     },
   ];
@@ -502,14 +579,20 @@ const pricing = selectedBase
     {
       title: "Virtual (Online) Participants",
       categories: [
-        { category: "Academicians/Delegates/Research Scholars/PhD candidates", earlyBird: 150, final: 200 },
-        { category: "UG/PG Students", earlyBird: 100, final: 150 },
-        { category: "Non-Presenter/Attendee/Listener", earlyBird: 90, final: 100 },
+        {
+          category: "Academicians/Delegates/Research Scholars/PhD candidates",
+          earlyBird: 125,
+          final: 150,
+        },
+        { category: "UG/PG Students", earlyBird: 100, final: 125 },
+        {
+          category: "Non-Presenter/Attendee/Listener",
+          earlyBird: 75,
+          final: 100,
+        },
       ],
     },
   ];
-
- 
 
   return (
     <section>
@@ -528,9 +611,10 @@ const pricing = selectedBase
         >
           <h1 className="text-3xl text-indigo-600 font-bold">Registration</h1>
           <p className="w-11/12 font-medium">
-            Welcome to the ICETMRS-2026 registration page. Secure your spot at this premier
-            conference to connect with global experts, present your research and advance your
-            career. Follow the steps below to complete your registration.
+            Welcome to the ICETMRS-2026 registration page. Secure your spot at
+            this premier conference to connect with global experts, present your
+            research and advance your career. Follow the steps below to complete
+            your registration.
           </p>
         </div>
 
@@ -549,20 +633,28 @@ const pricing = selectedBase
             Registration Fees
           </h1>
           <p className="text-red-600 font-medium mt-3 mb-8">
-            *Note: Additional charges applicable for Scopus publication (T&amp;C Apply)
+            *Note: Additional charges applicable for Scopus publication (T&amp;C
+            Apply)
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:p-5">
             {participationFees1.map((fee, index) => (
-              <table key={index} className="table-auto w-full border-collapse rounded-b-md shadow-xl">
+              <table
+                key={index}
+                className="table-auto w-full border-collapse rounded-b-md shadow-xl"
+              >
                 <caption className="bg-indigo-800 text-white p-2 rounded-t-md font-bold text-md">
                   {fee.title}
                 </caption>
                 <thead>
                   <tr className="bg-indigo-500 text-md text-white text-left">
                     <th className="border-r border-gray-200 p-4">Categories</th>
-                    <th className="border-r border-gray-200 p-4">Early Bird (USD)</th>
-                    <th className="p-4 border-r border-gray-200">Final (USD)</th>
+                    <th className="border-r border-gray-200 p-4">
+                      Early Bird (USD)
+                    </th>
+                    <th className="p-4 border-r border-gray-200">
+                      Final (USD)
+                    </th>
                     <th className="p-4">On Spot (USD)</th>
                   </tr>
                 </thead>
@@ -574,16 +666,30 @@ const pricing = selectedBase
                     >
                       <td className="border-r border-gray-200 p-4 text-wrap">
                         {item.category}
-                        {["Students", "Students with Scopus Publication"].includes(item.category) && (
+                        {[
+                          "Students",
+                          "Students with Scopus Publication",
+                        ].includes(item.category) && (
                           <span className="text-red-600">*</span>
                         )}
                       </td>
                       <td className="border-r border-gray-200 p-4">
-                        <label >
+                        <label
+                          className={
+                            !isEarlyBird ? "opacity-50 cursor-not-allowed" : ""
+                          }
+                        >
                           <input
                             type="radio"
                             name="price"
-                            onChange={() => handleBaseSelect(item.earlyBird, fee.title, item.category)}
+                            disabled={!isEarlyBird}
+                            onChange={() =>
+                              handleBaseSelect(
+                                item.earlyBird,
+                                fee.title,
+                                item.category,
+                              )
+                            }
                             value={item.earlyBird}
                             className="mr-2"
                           />
@@ -595,7 +701,13 @@ const pricing = selectedBase
                           <input
                             type="radio"
                             name="price"
-                            onChange={() => handleBaseSelect(item.final, fee.title, item.category)}
+                            onChange={() =>
+                              handleBaseSelect(
+                                item.final,
+                                fee.title,
+                                item.category,
+                              )
+                            }
                             value={item.final}
                             className="mr-2"
                           />
@@ -607,7 +719,13 @@ const pricing = selectedBase
                           <input
                             type="radio"
                             name="price"
-                            onChange={() => handleBaseSelect(item.onspot, fee.title, item.category)}
+                            onChange={() =>
+                              handleBaseSelect(
+                                item.onspot,
+                                fee.title,
+                                item.category,
+                              )
+                            }
                             value={item.onspot}
                             className="mr-2"
                           />
@@ -621,14 +739,19 @@ const pricing = selectedBase
             ))}
 
             {participationFees2.map((fee, index) => (
-              <table key={index} className="table-auto w-full border-collapse rounded-b-md shadow-xl">
+              <table
+                key={index}
+                className="table-auto w-full border-collapse rounded-b-md shadow-xl"
+              >
                 <caption className="bg-indigo-800 text-white p-2 rounded-t-md font-bold text-md">
                   {fee.title}
                 </caption>
                 <thead>
                   <tr className="bg-indigo-500 text-md text-white text-left">
                     <th className="border-r border-gray-200 p-4">Categories</th>
-                    <th className="border-r border-gray-200 p-4">Early Bird (USD)</th>
+                    <th className="border-r border-gray-200 p-4">
+                      Early Bird (USD)
+                    </th>
                     <th className="p-4">Final (USD)</th>
                   </tr>
                 </thead>
@@ -640,16 +763,30 @@ const pricing = selectedBase
                     >
                       <td className="border-r border-gray-200 p-4 text-wrap">
                         {item.category}
-                        {["Students", "Students with Scopus Publication"].includes(item.category) && (
+                        {[
+                          "Students",
+                          "Students with Scopus Publication",
+                        ].includes(item.category) && (
                           <span className="text-red-600">*</span>
                         )}
                       </td>
                       <td className="border-r border-gray-200 p-4">
-                        <label >
+                        <label
+                          className={
+                            !isEarlyBird ? "opacity-50 cursor-not-allowed" : ""
+                          }
+                        >
                           <input
                             type="radio"
                             name="price"
-                            onChange={() => handleBaseSelect(item.earlyBird, fee.title, item.category)}
+                            disabled={!isEarlyBird}
+                            onChange={() =>
+                              handleBaseSelect(
+                                item.earlyBird,
+                                fee.title,
+                                item.category,
+                              )
+                            }
                             value={item.earlyBird}
                             className="mr-2"
                           />
@@ -661,7 +798,13 @@ const pricing = selectedBase
                           <input
                             type="radio"
                             name="price"
-                            onChange={() => handleBaseSelect(item.final, fee.title, item.category)}
+                            onChange={() =>
+                              handleBaseSelect(
+                                item.final,
+                                fee.title,
+                                item.category,
+                              )
+                            }
                             value={item.final}
                             className="mr-2"
                           />
@@ -674,13 +817,11 @@ const pricing = selectedBase
               </table>
             ))}
           </div>
-
-          
         </div>
 
         <div className="text-red-500 md:px-12 mt-2">
-          *Indicates - UG/PG students only (You have to submit a soft copy of your
-          university/college identity card as a proof)
+          *Indicates - UG/PG students only (You have to submit a soft copy of
+          your university/college identity card as a proof)
         </div>
 
         {/* ── STEP 2: Journal Publication Support ── */}
@@ -701,8 +842,9 @@ const pricing = selectedBase
             Registration Form
           </h1>
           <p className="text-md font-medium mt-2">
-            &quot;2<span className="text-sm align-super">nd</span> International Conference on
-            Emerging Trends in Multidisciplinary Research Studies (ICETMRS-2026)&quot;
+            &quot;2<span className="text-sm align-super">nd</span> International
+            Conference on Emerging Trends in Multidisciplinary Research Studies
+            (ICETMRS-2026)&quot;
           </p>
 
           <form
@@ -711,14 +853,19 @@ const pricing = selectedBase
             className="text-sm p-2 md:p-6 flex flex-col md:flex-row justify-between md:gap-10 items-start shadow-md rounded-lg mt-8 md:w-11/12"
           >
             {/* ── Left: Form Fields ── */}
-            <section className="w-full space-y-4 md:columns-2 gap-5" data-aos="fade-up">
+            <section
+              className="w-full space-y-4 md:columns-2 gap-5"
+              data-aos="fade-up"
+            >
               <div>
                 <select
                   className="w-full p-2.5 border border-gray-300 outline-none rounded-md"
                   name="Title"
                   defaultValue=""
                 >
-                  <option value="" disabled>Select Title</option>
+                  <option value="" disabled>
+                    Select Title
+                  </option>
                   <option>Mr</option>
                   <option>Ms</option>
                   <option>Mrs</option>
@@ -817,7 +964,9 @@ const pricing = selectedBase
                   onChange={(e) => setParticipantCategory(e.target.value)}
                   required
                 >
-                  <option value="" disabled>Select Participant Category</option>
+                  <option value="" disabled>
+                    Select Participant Category
+                  </option>
                   <option>Academicians</option>
                   <option>Delegates</option>
                   <option>Research scholars</option>
@@ -825,14 +974,26 @@ const pricing = selectedBase
                 </select>
               </div>
               <div className="space-y-2">
-                <span className="block font-medium">Presentation Category:</span>
+                <span className="block font-medium">
+                  Presentation Category:
+                </span>
                 <div className="flex space-x-4">
                   <label className="flex items-center space-x-2">
-                    <input type="radio" name="presentation_Category" value="oral" className="form-radio" />
+                    <input
+                      type="radio"
+                      name="presentation_Category"
+                      value="oral"
+                      className="form-radio"
+                    />
                     <span>Oral</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="radio" name="presentation_Category" value="poster" className="form-radio" />
+                    <input
+                      type="radio"
+                      name="presentation_Category"
+                      value="poster"
+                      className="form-radio"
+                    />
                     <span>Poster</span>
                   </label>
                 </div>
@@ -841,11 +1002,21 @@ const pricing = selectedBase
                 <span className="block font-medium">Presentation Type:</span>
                 <div className="flex space-x-4">
                   <label className="flex items-center space-x-2">
-                    <input type="radio" name="presentation_Type" value="Virtual" className="form-radio" />
+                    <input
+                      type="radio"
+                      name="presentation_Type"
+                      value="Virtual"
+                      className="form-radio"
+                    />
                     <span>Virtual</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="radio" name="presentation_Type" value="Physical" className="form-radio" />
+                    <input
+                      type="radio"
+                      name="presentation_Type"
+                      value="Physical"
+                      className="form-radio"
+                    />
                     <span>Physical</span>
                   </label>
                 </div>
@@ -879,7 +1050,10 @@ const pricing = selectedBase
                     className="w-4 h-4"
                     value="on"
                   />
-                  <label htmlFor="terms" className="font-medium cursor-pointer text-sm">
+                  <label
+                    htmlFor="terms"
+                    className="font-medium cursor-pointer text-sm"
+                  >
                     I agree to the{" "}
                     <span className="text-indigo-600 underline cursor-pointer">
                       Terms and Conditions
@@ -894,12 +1068,9 @@ const pricing = selectedBase
                   Check Out (Open Payment Gateway)
                 </button>
 
-                <div className="relative w-full h-2 bg-gray-100 border border-indigo-200 rounded-full overflow-hidden">
-                  <div className="absolute top-0 left-0 h-full w-0 rounded-md bg-gradient-to-r from-indigo-900 to-indigo-500 animate-[fillProgress_6s_ease-in-out_infinite]" />
-                </div>
-
                 <p className="text-center text-gray-500 text-xs">
-                  *Please note that the payee is responsible for all bank charges.
+                  *Please note that the payee is responsible for all bank
+                  charges.
                 </p>
               </div>
             </div>

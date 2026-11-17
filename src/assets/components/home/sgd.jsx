@@ -5,7 +5,7 @@ export default function Sdg() {
       alt: "cerada-logo",
     },
     {
-      image: "/images/logo/scopus-logo.webp",
+      image: "/images/logo/scopus-logo.png",
       alt: "scopus-logo",
     },
     // {

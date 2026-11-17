@@ -1,6 +1,6 @@
 export default function Proceedings() {
   const proceeding_logo = [
-    "/images/logo/scopus-logo.webp",
+    "/images/logo/scopus-logo.png",
     "/images/logo/sjr-logo.webp",
     // "/images/logo/clarivate-analytics-and-web-of-science2.webp",
   ];

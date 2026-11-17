@@ -22,9 +22,6 @@ const Download = () => {
       });
       if (res.status === 200) {
         setDownloadData(res.data.data);
-        toaster.success(
-          res.data.message || "Brochure download data fetched successfully!"
-        );
       } else {
         toaster.warning(`Failed to fetch data: ${res.statusText}`);
         setError(`Failed to fetch data: ${res.statusText}`);

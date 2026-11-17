@@ -23,9 +23,6 @@ const Registration = () => {
       );
       if (res.status === 200) {
         setRegistrationData(res.data.data);
-        toaster.success(
-          res.data.message || "Registration data fetched successfully!"
-        );
       } else {
         toaster.warning(`Failed to fetch data: ${res.statusText}`);
         setError(`Failed to fetch data: ${res.statusText}`);

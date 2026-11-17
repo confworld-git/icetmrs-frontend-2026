@@ -1,29 +1,25 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-// import bg from "/images/login/login_bg.webp"; // No longer needed for background
-import loginBanner from "/images/login/loginbanner.jpg"; // Import the new banner image
 import { toaster } from "evergreen-ui";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { Eye, EyeOff } from "lucide-react";
+import logo from "/images/logo/icetmrslogo1.png";
 
 const Login = () => {
   const navigate = useNavigate();
-
-  // Initialize and Refresh AOS
-  useEffect(() => {
-    AOS.init({
-      duration: 1000,
-      once: true,
-      offset: 50,
-    });
-    AOS.refresh();
-  }, []);
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [forgotLoading, setForgotLoading] = useState(false);
 
   const onSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
     try {
-      e.preventDefault();
-      const formData = new FormData(e.currentTarget);
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
 
       const res = await axios.post(
         import.meta.env.VITE_API_URL + "/login",
@@ -31,7 +27,7 @@ const Login = () => {
         { withCredentials: true }
       );
       if (res.status === 200) {
-        toaster.success(res.data.message);
+        toaster.success(res.data.message || "Login successful!");
         navigate("/Dashboard");
       }
     } catch (error) {
@@ -40,80 +36,121 @@ const Login = () => {
           ? error.response.data.message
           : "An unexpected error occurred.";
       toaster.danger(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async () => {
+    setForgotLoading(true);
+    try {
+      const res = await axios.post(
+        import.meta.env.VITE_API_URL + "/forgot-password",
+        {},
+        { withCredentials: true }
+      );
+      if (res.status === 200) {
+        toaster.success(res.data.message || "Credentials sent!");
+      }
+    } catch (error) {
+      const errorMessage =
+        error.response && error.response.data && error.response.data.message
+          ? error.response.data.message
+          : "Failed to send credentials.";
+      toaster.danger(errorMessage);
+    } finally {
+      setForgotLoading(false);
     }
   };
 
   return (
-    <section>
-      {/* <Helmet>
-        <title>Login | ICLSMHA 2026</title>
-        <meta name="robots" content="noindex, nofollow" />
-        <link rel="canonical" href="https://iclsmha.cerada.in/login" />
-      </Helmet> */}
-      <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8">
-        {/* Main container for desktop: flex-row, for mobile: flex-col */}
-        <div
-          data-aos="zoom-in" // Using zoom-in for the whole card
-          className="flex flex-col lg:flex-row w-full max-w-4xl bg-white shadow-xl rounded-lg overflow-hidden"
-        >
-          {/* Left Section: Image (visible on desktop, hidden or smaller on mobile) */}
-          <div className="lg:w-1/2 flex justify-center items-center bg-gray-900 p-4 sm:p-6 lg:p-0">
-            <img
-              src={loginBanner}
-              alt="Login Banner"
-              className="w-full h-auto object-cover rounded-lg lg:rounded-none lg:h-full"
-            />
+    <div className="min-h-screen bg-[#f4f6f8] flex flex-col justify-between font-sans">
+      {/* Main Content */}
+      <div className="flex-grow flex flex-col items-center justify-center p-4">
+        
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] w-full max-w-[440px] p-8 md:p-10 border border-gray-100">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <img src={logo} alt="Logo" className="h-16 object-contain" />
           </div>
 
-          {/* Right Section: Login Form */}
-          <div className="lg:w-1/2 p-6 sm:p-8 md:p-10 flex flex-col justify-center items-center">
-            <h1 className="text-3xl font-bold text-gray-800 text-center mb-8">
-              <span className="text-blue-500">Admin</span> Login
-            </h1>
-            <form onSubmit={onSubmit} className="w-full max-w-sm space-y-6">
-              <div>
-                <label
-                  htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Email Address
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  placeholder="you@example.com"
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-800"
-                />
-              </div>
-              <div>
+          {/* Titles */}
+          <h1 className="text-[22px] md:text-2xl font-semibold text-gray-800 text-center mb-3">
+            Admin Portal
+          </h1>
+          
+
+          {/* Form */}
+          <form onSubmit={onSubmit} className="space-y-5">
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-[11px] font-semibold text-gray-600 tracking-wider mb-2 uppercase"
+              >
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@icetmrs.org"
+                required
+                className="w-full px-3 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0a1172] focus:border-transparent text-gray-800 text-sm transition-colors"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-2">
                 <label
                   htmlFor="password"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-[11px] font-semibold text-gray-600 tracking-wider uppercase"
                 >
                   Password
                 </label>
-                <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  placeholder="Enter your password"
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-800"
-                />
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={forgotLoading}
+                  className="text-xs font-semibold text-[#0a1172] hover:text-blue-900 transition-colors"
+                >
+                  {forgotLoading ? "Sending..." : "Forgot your password?"}
+                </button>
               </div>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  required
+                  className="w-full px-3 py-2.5 pr-10 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0a1172] focus:border-transparent text-gray-800 tracking-[0.2em] text-lg placeholder:tracking-normal placeholder:text-sm transition-colors"
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-2">
               <button
                 type="submit"
-                className="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-semibold hover:bg-blue-700 transition duration-300 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
+                disabled={loading}
+                className="w-full bg-[#0a1172] text-white py-3 px-4 rounded-lg text-sm font-semibold hover:bg-[#070b4a] transition duration-300 ease-in-out shadow-sm focus:outline-none focus:ring-2 focus:ring-[#0a1172] focus:ring-offset-2 flex justify-center items-center"
               >
-                Login
+                {loading ? "Signing In..." : "Sign In"}
               </button>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
